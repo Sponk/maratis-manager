@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <downloadingdlg.h>
 #include <QFileDialog>
 #include <QStringList>
 #include <QCheckBox>

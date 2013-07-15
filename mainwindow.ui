@@ -306,8 +306,8 @@
    <slot>openProjectButtonClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>399</x>
-     <y>146</y>
+     <x>410</x>
+     <y>112</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -322,8 +322,8 @@
    <slot>startEditorButtonClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>93</x>
-     <y>186</y>
+     <x>104</x>
+     <y>152</y>
     </hint>
     <hint type="destinationlabel">
      <x>404</x>
@@ -338,8 +338,8 @@
    <slot>installUpdatesButtonClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>168</x>
-     <y>156</y>
+     <x>179</x>
+     <y>122</y>
     </hint>
     <hint type="destinationlabel">
      <x>498</x>
@@ -354,8 +354,8 @@
    <slot>updateSourceChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>220</x>
-     <y>126</y>
+     <x>231</x>
+     <y>92</y>
     </hint>
     <hint type="destinationlabel">
      <x>480</x>

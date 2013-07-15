@@ -28,7 +28,6 @@ public slots:
     void startEditorButtonClick();
     void installUpdatesButtonClick();
     void updateSourceChanged();
-    void startColorChooser();
 
 private:
     Ui::MainWindow *ui;
