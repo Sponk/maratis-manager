@@ -7,6 +7,10 @@
 #include <QMessageBox>
 #include <guithread.h>
 
+#ifndef WIN32
+    #include <sys/stat.h>
+#endif
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -50,7 +54,7 @@ void MainWindow::loadHistory()
 #ifdef WIN32
     QFile history(QDir::homePath() + "\\Documents\\maratis-project-history.conf");
 #else
-    QFile history(QDir::homePath() + "/.maratis-project-history.conf");
+    QFile history(QDir::homePath() + "/.maratis-manager/history.conf");
 #endif
 
     if(!history.open(QIODevice::ReadOnly))
@@ -77,7 +81,7 @@ void MainWindow::saveHistory()
 #ifdef WIN32
     QFile history(QDir::homePath() + "\\Documents\\maratis-project-history.conf");
 #else
-    QFile history(QDir::homePath() + "/.maratis-project-history.conf");
+    QFile history(QDir::homePath() + "/.maratis-manager/history.conf");
 #endif
 
     if(!history.open(QIODevice::WriteOnly))
@@ -110,8 +114,9 @@ void MainWindow::startEditorButtonClick()
     if(project.length() != 0 && project != "Empty")
         args.append(project);
 
-#ifdef linux
-    QDir::setCurrent("./Bin/");
+#ifndef WIN32
+    QString prefix = QDir::homePath() + "/.maratis-manager/";
+    QDir::setCurrent(prefix + "/Bin/");
     QString currentPath = QDir::current().absolutePath();
 
     editorProc.start(currentPath + "/MaratisEditor", args);
@@ -138,13 +143,20 @@ void MainWindow::updateProgress(int value)
 void MainWindow::installThread()
 {
     int idx = ui->sourceCombo->currentIndex();
+    QString prefix = "";
+
+#ifndef WIN32
+    prefix = QDir::homePath() + "/.maratis-manager/";
+    QDir(QDir::homePath()).mkdir(prefix);
+    QDir::setCurrent(prefix);
+#endif
 
     switch(idx)
     {
     // Sourcecode from SVN
     case 0:
     {
-#ifdef linux
+#ifndef WIN32
 
         currentAction = "Downloading...";
 
@@ -233,18 +245,18 @@ void MainWindow::installThread()
     // Nisturs Maratis via Git
     case 2:
     {
-#ifdef linux
+#ifndef WIN32
 
         currentAction = "Downloading...";
 
         if(!QDir("maratis").exists())
         {
             system("git clone https://github.com/nistur/maratis.git");
-            QDir::setCurrent("./maratis");
+            QDir::setCurrent(prefix + "./maratis");
         }
         else
         {
-            QDir::setCurrent("./maratis");
+            QDir::setCurrent(prefix + "./maratis");
             system("git pull");
         }
 
