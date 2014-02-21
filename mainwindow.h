@@ -28,6 +28,8 @@ public slots:
     void startEditorButtonClick();
     void installUpdatesButtonClick();
     void updateSourceChanged();
+    void openWithFileManager();
+    void createPluginClick();
 
 private:
     Ui::MainWindow *ui;
@@ -40,6 +42,17 @@ private:
     void loadHistory();
     void saveHistory();
     bool doesComboContain(QComboBox* box, QString string);
+    void cp(QString src, QString dest);
+    bool rmdir(QString dirName);
+    void touchFile(QString file);
+
+    class SleepHelper : public QThread
+    {
+    public:
+        static void usleep(unsigned long usecs){QThread::usleep(usecs);}
+        static void msleep(unsigned long msecs){QThread::msleep(msecs);}
+        static void sleep(unsigned long secs){QThread::sleep(secs);}
+    };
 };
 
 #endif // MAINWINDOW_H
