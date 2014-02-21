@@ -122,79 +122,12 @@ void MainWindow::createPluginClick()
         return;
     }
 
-#ifndef WIN32
-    path = path.replace(path.lastIndexOf("/"), path.size(), "");
-    mkdir(QString(path + "/GamePlugin").toAscii(), S_IRUSR | S_IREAD | S_IWUSR | S_IXUSR);
-    mkdir(QString(path + "/GamePlugin/src").toAscii(), S_IRUSR | S_IREAD | S_IWUSR | S_IXUSR);
-    mkdir(QString(path + "/GamePlugin/build").toAscii(), S_IRUSR | S_IREAD | S_IWUSR | S_IXUSR);
-
-    system(QString("touch '" + path + "/GamePlugin/src/main.cpp'").toAscii());
-
-    QString prefix = QDir::homePath() + "/.maratis-manager/";
-    QDir::setCurrent(prefix);
-
-    system(QString("cp -rf Includes '" + path + "/GamePlugin'").toAscii());
-
-    std::ofstream out;
-    out.open(QString(path + "/GamePlugin/src/CMakeLists.txt").toAscii());
-
-    if(!out.is_open())
-    {
-        QMessageBox::information(this, "Error", tr("Could not open file: ") + path + "/GamePlugin/src/CMakeLists.txt");
-        return;
-    }
-
-    using std::endl;
-
-    out << "cmake_minimum_required(VERSION 2.6)" << endl;
-    out << "project(Plugin)" << endl;
-    out << "file(GLOB all_SRC \"*.h\" \"*.cpp\")" << endl;
-    out << "set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../..)" << endl;
-    out << "set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../..)" << endl;
-    out << "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../..)" << endl;
-
-    out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
-    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
-
-    out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
-
-    out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
-
-    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
-    out << "link_directories(${CMAKE_BINARY_DIR}/../lib)" << endl;
-
-    out << "foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} ) " << endl;
-    out << "string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )" << endl;
-    out << "set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
-    out << "set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
-    out << "set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
-    out << "endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )" << endl;
-
-    out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
-
-    out << "add_library(Game SHARED ${all_SRC})" << endl;
-    out << "set_target_properties(Game PROPERTIES PREFIX \"\")" << endl;
-    out.close();
-
-    QDir::setCurrent(path + "/GamePlugin/build");
-
-    int status1 = 0;
-    int status2 = 0;
-
-    status1 = system("cmake ../src");
-    status2 = system("cmake ../src -G 'CodeBlocks - Unix Makefiles'");
-
-    if(status1 || status2)
-    {
-        QMessageBox::information(this, "Error", tr("Could not run CMake!"));
-    }
-
-#else
-
+#ifdef WIN32
     QString appDir = QApplication::applicationDirPath();
     appDir += "/system/cmake/bin/";
-
-    qDebug() << appDir;
+#else
+    QString appDir = "";
+#endif
 
     path = path.replace(path.lastIndexOf("/"), path.size(), "");
     rmdir(path + "/GamePlugin/build");
@@ -206,16 +139,19 @@ void MainWindow::createPluginClick()
 
     touchFile(path + "/GamePlugin/src/main.cpp");
     cp(QDir::current().absoluteFilePath("./Includes"), path + "/GamePlugin/Includes");
-    //system(QString("cp -rf Includes '" + path + "/GamePlugin'").toAscii());
 
     QFile("./MSDK/MCore.lib").copy(path + "/GamePlugin/lib/MCore.lib");
     QFile("./MSDK/MEngine.lib").copy(path + "/GamePlugin/lib/MEngine.lib");
 
     std::ofstream out;
-    QString cmakefile_path = QString(path + "/GamePlugin/src/CMakeLists.txt").replace("/", "\\");
 
-    qDebug() << cmakefile_path;
-    out.open(QString(path + "/GamePlugin/src/CMakeLists.txt").replace("/", "\\").toAscii());
+#ifdef WIN32
+    QString cmakefile_path = QString(path + "/GamePlugin/src/CMakeLists.txt").replace("/", "\\");
+#else
+    QString cmakefile_path = QString(path + "/GamePlugin/src/CMakeLists.txt");
+#endif
+
+    out.open(cmakefile_path.toAscii());
 
     if(!out.is_open())
     {
@@ -260,15 +196,17 @@ void MainWindow::createPluginClick()
     int status1 = 0;
     int status2 = 0;
 
-    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src");
-    // status2 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src" << "-G" << "'CodeBlocks'");
+#ifdef WIN32
+    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src"<< "-G" << "'CodeBlocks'");
+#else
+    status1 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src");
+    status2 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src" << "-G" << "CodeBlocks - Unix Makefiles");
+#endif
 
     if(status1 || status2)
     {
         QMessageBox::information(this, "Error", tr("Could not run CMake!"));
     }
-
-#endif
 }
 
 void MainWindow::updateEditorStdout()
