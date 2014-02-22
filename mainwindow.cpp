@@ -16,12 +16,17 @@
     #include <sys/stat.h>
 #endif
 
+#define PROGRAM_VERSION_STRING "0.2"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
     ui->progressBar->setVisible(false);
+
+    ui->maratisManagerVersionLabel->setText(PROGRAM_VERSION_STRING);
+    ui->weblinkLabel->setOpenExternalLinks(true);
 
     connect(&editorProc, SIGNAL(readyReadStandardOutput()), this, SLOT(updateEditorStdout()));
     connect(&editorProc, SIGNAL(readyReadStandardError()), this, SLOT(updateEditorStdout()));
@@ -310,15 +315,14 @@ void MainWindow::startEditorButtonClick()
 
     }
 
-    editorProc.start(currentPath + "/MaratisEditor", args);
+    editorProc.startDetached(currentPath + "/MaratisEditor", args);
     QDir::setCurrent("../");
 #else
     QDir::setCurrent(".\\Bin\\");
     QString currentPath = QDir::current().absolutePath();
 
-#ifdef WIN32
     currentPath = currentPath.replace("/", "\\");
-#endif
+
     editorProc.start(currentPath + "\\MaratisEditor.exe", args);
     QDir::setCurrent("..\\");
 #endif
@@ -599,4 +603,17 @@ void MainWindow::updateSourceChanged()
 
     ui->keepCodeBox->setEnabled(svn);
     ui->threadsBox->setEnabled(svn);
+}
+
+void MainWindow::currentTabChanged(int idx)
+{
+#ifndef WIN32
+    if(QFile(QDir::homePath() + "/.maratis-manager/Bin/MaratisEditor").exists())
+        ui->editorStatusLabel->setText(tr("The Maratis editor is installed!"));
+#else
+    if(QFile("./Bin/MaratisEditor.exe").exists())
+        ui->editorStatusLabel->setText(tr("The Maratis editor is installed!"));
+#endif
+    else
+        ui->editorStatusLabel->setText(tr("The Maratis editor is NOT installed!"));
 }

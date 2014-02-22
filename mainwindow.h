@@ -30,6 +30,7 @@ public slots:
     void updateSourceChanged();
     void openWithFileManager();
     void createPluginClick();
+    void currentTabChanged(int idx);
 
 private:
     Ui::MainWindow *ui;
