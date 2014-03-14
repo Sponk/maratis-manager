@@ -315,7 +315,7 @@ void MainWindow::startEditorButtonClick()
 
     }
 
-    editorProc.startDetached(currentPath + "/MaratisEditor", args);
+    editorProc.start(currentPath + "/MaratisEditor", args);
     QDir::setCurrent("../");
 #else
     QDir::setCurrent(".\\Bin\\");
@@ -329,7 +329,7 @@ void MainWindow::startEditorButtonClick()
 
     saveHistory();
     ui->consoleOutput->clear();
-    ui->tabWidget->setCurrentIndex(3);
+    ui->tabWidget->setCurrentIndex(2);
 }
 
 void MainWindow::updateProgress(int value)
