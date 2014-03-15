@@ -75,6 +75,8 @@ void MainWindow::cp(QString src, QString dest)
     if (!dir.exists())
         return;
 
+    dest = QDir(dest).absolutePath();
+    src = QDir(src).absolutePath();
     QDir::root().mkpath(dest);
 
     foreach (QString d, dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot))
@@ -359,21 +361,24 @@ void MainWindow::installThread()
         currentAction = "Downloading...";
 
         if(!QDir("maratis-read-only").exists())
-        {
-            system("svn checkout http://maratis.googlecode.com/svn/ maratis-read-only");
+        {  
+            QProcess::execute("/usr/bin/svn", QStringList() << "checkout" << "http://maratis.googlecode.com/svn/" << "maratis-read-only");
             QDir::setCurrent("./maratis-read-only");
         }
         else
         {
             QDir::setCurrent("./maratis-read-only");
-            system("svn update");
+            QProcess::execute("/usr/bin/svn", QStringList() << "update");
         }
 
         currentAction = "Compiling...";
         progress = 20;
 
         QDir::setCurrent("./trunk/dev");
-        if(system((QString("python scons.py -j") + QString::number(ui->threadsBox->value())).toAscii()) != 0)
+
+        int ret = QProcess::execute("/usr/bin/python", QStringList() << "scons.py" << "-j" + QString::number(ui->threadsBox->value()).toAscii());
+
+        if(ret != 0)
         {
             QMessageBox::information(this, "Error", tr("Could not compile Maratis!"));
             currentAction = "Error!";
@@ -385,22 +390,28 @@ void MainWindow::installThread()
         progress = 40;
 
         QDir::setCurrent("../../../");
-        system("rm -r -f Bin");
+        //system("rm -r -f Bin");
+        rmdir("Bin");
 
         currentAction = "Install...";
         progress = 60;
 
-        system("cp -r ./maratis-read-only/trunk/dev/prod/linux2/release/Maratis/Bin ./");
+        cp("./maratis-read-only/trunk/dev/prod/linux2/release/Maratis/Bin", "./Bin");
+        cp("./maratis-read-only/trunk/dev/prod/linux2/release/MSDK", "./MSDK");
+        cp("./maratis-read-only/trunk/dev/MSDK/MCore/Includes", "./Includes");
+        cp("./maratis-read-only/trunk/dev/MSDK/MEngine/Includes", "./Includes");
+
+        /*system("cp -r ./maratis-read-only/trunk/dev/prod/linux2/release/Maratis/Bin ./");
         system("cp -r ./maratis-read-only/trunk/dev/prod/linux2/release/MSDK ./");
         system("cp -r ./maratis-read-only/trunk/dev/MSDK/MCore/Includes ./");
-        system("cp -r ./maratis-read-only/trunk/dev/MSDK/MEngine/Includes ./");
+        system("cp -r ./maratis-read-only/trunk/dev/MSDK/MEngine/Includes ./");*/
 
         progress = 80;
         currentAction = "Cleaning up...";
 
         if(!ui->keepCodeBox->checkState() == Qt::Checked)
         {
-            system("rm -r -f maratis-read-only");
+            rmdir("maratis-read-only");
         }
 
         currentAction = "Done.";
@@ -440,8 +451,10 @@ void MainWindow::installThread()
 
         currentAction = "Cleaning...";
         QDir::setCurrent("..\\..\\..\\");
-        system("del /s /q Bin");
-        system("mkdir Bin");
+        //system("del /s /q Bin");
+        rmdir("Bin");
+        QDir::mkdir("Bin");
+        //system("mkdir Bin");
 
         progress = 60;
 
@@ -471,90 +484,6 @@ void MainWindow::installThread()
     case 1:
 
     break;
-
-    // Nisturs Maratis via Git
-    case 2:
-    {
-#ifndef WIN32
-
-        currentAction = "Downloading...";
-
-        if(!QDir("maratis").exists())
-        {
-            system("git clone https://github.com/nistur/maratis.git");
-            QDir::setCurrent(prefix + "./maratis");
-        }
-        else
-        {
-            QDir::setCurrent(prefix + "./maratis");
-            system("git pull");
-        }
-
-        currentAction = "Compiling...";
-        progress = 20;
-
-        QDir::setCurrent("./trunk/dev");
-        system((QString("python scons.py -j") + QString::number(ui->threadsBox->value())).toAscii());
-
-        currentAction = "Cleaning up...";
-        progress = 40;
-
-        QDir::setCurrent("../../../");
-        system("rm -r -f Bin");
-
-        currentAction = "Install...";
-        progress = 60;
-
-        system("cp -r ./maratis/trunk/dev/prod/linux2/release/Maratis/Bin ./");
-
-        progress = 80;
-        currentAction = "Cleaning up...";
-
-        if(!ui->keepCodeBox->checkState() == Qt::Checked)
-        {
-            system("rm -r -f maratis");
-        }
-
-        currentAction = "Done.";
-        progress = 100;
-#else
-        if(!QDir("maratis").exists())
-        {
-            system("git clone https://github.com/nistur/maratis.git");
-            QDir::setCurrent(".\\maratis");
-        }
-        else
-        {
-            QDir::setCurrent(".\\maratis");
-            system("git pull");
-        }
-
-        progress = 20;
-
-        QDir::setCurrent(".\\trunk\\dev");
-        system((QString("python scons.py -j") + QString::number(ui->threadsBox->value())).toAscii());
-
-        progress = 40;
-
-        QDir::setCurrent("..\\..\\..\\");
-        system("del /s /q Bin");
-        system("mkdir Bin");
-
-        progress = 60;
-
-        system("xcopy .\\maratis\\trunk\\dev\\prod\\win32_i386\\release\\Maratis\\Bin .\\Bin /e /i /h");
-
-        progress = 80;
-
-        if(!ui->keepCodeBox->checkState() == Qt::Checked)
-        {
-            system("del /s /q maratis");
-        }
-
-        progress = 100;
-#endif
-    }
-        break;
     }
 }
 
