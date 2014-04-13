@@ -16,7 +16,7 @@
     #include <sys/stat.h>
 #endif
 
-#define PROGRAM_VERSION_STRING "0.2"
+#define PROGRAM_VERSION_STRING "0.2.1"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -119,6 +119,39 @@ void MainWindow::openWithFileManager()
     QDesktopServices::openUrl("file:///" + path);
 }
 
+void MainWindow::rerunCMake()
+{
+    QString path = ui->lastUsedCombo->currentText();
+
+    if(path == "Empty")
+    {
+        QMessageBox::information(this, tr("Error"), tr("You have to select a valid Maratis project!"));
+        return;
+    }
+
+    path = path.replace(path.lastIndexOf("/"), path.size(), "");
+    QDir::setCurrent(path + "/GamePlugin/build");
+
+    int status1 = 0;
+    int status2 = 0;
+
+#ifdef WIN32
+    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src"<< "-G" << "'CodeBlocks'");
+#else
+    status1 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src");
+    status2 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src" << "-G" << "CodeBlocks - Unix Makefiles");
+#endif
+
+    if(status1 || status2)
+    {
+        QMessageBox::information(this, "Error", tr("Could not run CMake!"));
+    }
+    else
+    {
+        QMessageBox::information(this, tr("Information"), tr("CMake build system succesfully updated!"));
+    }
+}
+
 void MainWindow::createPluginClick()
 {
     QString path = ui->lastUsedCombo->currentText();
@@ -158,7 +191,7 @@ void MainWindow::createPluginClick()
     QString cmakefile_path = QString(path + "/GamePlugin/src/CMakeLists.txt");
 #endif
 
-    out.open(cmakefile_path.toAscii());
+    out.open(cmakefile_path.toLatin1());
 
     if(!out.is_open())
     {
@@ -198,22 +231,7 @@ void MainWindow::createPluginClick()
     out << "set_target_properties(Game PROPERTIES PREFIX \"\")" << endl;
     out.close();
 
-    QDir::setCurrent(path + "/GamePlugin/build");
-
-    int status1 = 0;
-    int status2 = 0;
-
-#ifdef WIN32
-    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src"<< "-G" << "'CodeBlocks'");
-#else
-    status1 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src");
-    status2 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src" << "-G" << "CodeBlocks - Unix Makefiles");
-#endif
-
-    if(status1 || status2)
-    {
-        QMessageBox::information(this, "Error", tr("Could not run CMake!"));
-    }
+    rerunCMake();
 }
 
 void MainWindow::updateEditorStdout()
@@ -376,7 +394,7 @@ void MainWindow::installThread()
 
         QDir::setCurrent("./trunk/dev");
 
-        int ret = QProcess::execute("/usr/bin/python", QStringList() << "scons.py" << "-j" + QString::number(ui->threadsBox->value()).toAscii());
+        int ret = QProcess::execute("/usr/bin/python", QStringList() << "scons.py" << "-j" + QString::number(ui->threadsBox->value()).toLatin1());
 
         if(ret != 0)
         {

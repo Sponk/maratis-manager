@@ -101,13 +101,6 @@
                 </widget>
                </item>
                <item>
-                <widget class="QPushButton" name="pushButton_2">
-                 <property name="text">
-                  <string>Create Plugin</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <spacer name="horizontalSpacer">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
@@ -122,20 +115,72 @@
                </item>
               </layout>
              </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_6">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="title">
+           <string>Game Plugin</string>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_4">
              <item>
-              <spacer name="verticalSpacer">
+              <widget class="QPushButton" name="pushButton_2">
+               <property name="text">
+                <string>Create Plugin</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="rerunCmakeButton">
+               <property name="text">
+                <string>Rerun CMake</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_4">
                <property name="orientation">
-                <enum>Qt::Vertical</enum>
+                <enum>Qt::Horizontal</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>20</width>
-                 <height>40</height>
+                 <width>40</width>
+                 <height>20</height>
                 </size>
                </property>
               </spacer>
              </item>
             </layout>
+           </item>
+           <item>
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -317,11 +362,20 @@
              <x>0</x>
              <y>0</y>
              <width>505</width>
-             <height>326</height>
+             <height>330</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_5">
-            <property name="margin">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
              <number>0</number>
             </property>
             <item>
@@ -455,7 +509,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>515</x>
-     <y>128</y>
+     <y>125</y>
     </hint>
     <hint type="destinationlabel">
      <x>247</x>
@@ -534,8 +588,8 @@
    <slot>createPluginClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>149</y>
+     <x>147</x>
+     <y>232</y>
     </hint>
     <hint type="destinationlabel">
      <x>283</x>
@@ -559,6 +613,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rerunCmakeButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>rerunCMake()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>218</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>29</x>
+     <y>2</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openProjectButtonClick()</slot>
@@ -570,5 +640,6 @@
   <slot>openWithFileManager()</slot>
   <slot>createPluginClick()</slot>
   <slot>currentTabChanged(int)</slot>
+  <slot>rerunCMake()</slot>
  </slots>
 </ui>

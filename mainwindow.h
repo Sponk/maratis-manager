@@ -31,6 +31,7 @@ public slots:
     void openWithFileManager();
     void createPluginClick();
     void currentTabChanged(int idx);
+    void rerunCMake();
 
 private:
     Ui::MainWindow *ui;
