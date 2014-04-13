@@ -132,11 +132,16 @@ void MainWindow::rerunCMake()
     path = path.replace(path.lastIndexOf("/"), path.size(), "");
     QDir::setCurrent(path + "/GamePlugin/build");
 
+#ifdef WIN32
+    QString appDir = QApplication::applicationDirPath();
+    appDir += "/system/cmake/bin/";
+#endif
+
     int status1 = 0;
     int status2 = 0;
 
 #ifdef WIN32
-    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src"<< "-G" << "'CodeBlocks'");
+    status1 = QProcess::execute(appDir + "cmake.exe",   QStringList() << "../src");
 #else
     status1 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src");
     status2 = QProcess::execute("/usr/bin/cmake",   QStringList() << "../src" << "-G" << "CodeBlocks - Unix Makefiles");
@@ -165,8 +170,11 @@ void MainWindow::createPluginClick()
 #ifdef WIN32
     QString appDir = QApplication::applicationDirPath();
     appDir += "/system/cmake/bin/";
+    QString prefix = qgetenv("APPDATA") + "/maratis-manager/";
+    prefix = prefix.replace("\\", "/");
 #else
     QString appDir = "";
+    QString prefix = QDir::homePath() + "/.maratis-manager/";
 #endif
 
     path = path.replace(path.lastIndexOf("/"), path.size(), "");
@@ -176,12 +184,13 @@ void MainWindow::createPluginClick()
     QDir::root().mkpath(QString(path + "/GamePlugin/build"));
     QDir::root().mkpath(QString(path + "/GamePlugin/lib"));
 
-
     touchFile(path + "/GamePlugin/src/main.cpp");
-    cp(QDir::current().absoluteFilePath("./Includes"), path + "/GamePlugin/Includes");
+    cp(prefix + "./Includes", path + "/GamePlugin/Includes");
 
-    QFile("./MSDK/MCore.lib").copy(path + "/GamePlugin/lib/MCore.lib");
-    QFile("./MSDK/MEngine.lib").copy(path + "/GamePlugin/lib/MEngine.lib");
+#ifdef WIN32
+    QFile::copy(prefix + "MSDK/MCore.lib", path + "/GamePlugin/lib/MCore.lib");
+    QFile::copy(prefix + "MSDK/MEngine.lib", path + "/GamePlugin/lib/MEngine.lib");
+#endif
 
     std::ofstream out;
 
@@ -208,27 +217,27 @@ void MainWindow::createPluginClick()
     out << "set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../..)" << endl;
     out << "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../..)" << endl;
 
-    out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
-    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
-
-    out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
-
     out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
-
-    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
-    out << "link_directories(${CMAKE_BINARY_DIR}/../lib)" << endl;
-
     out << "foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} ) " << endl;
     out << "string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )" << endl;
     out << "set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
     out << "set( CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
     out << "set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/../..)" << endl;
     out << "endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )" << endl;
-
     out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
+
+    out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
+    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
+    out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Linux\")" << endl;
 
     out << "add_library(Game SHARED ${all_SRC})" << endl;
     out << "set_target_properties(Game PROPERTIES PREFIX \"\")" << endl;
+
+    out << "if(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
+    out << "include_directories(${CMAKE_BINARY_DIR}/../Includes)" << endl;
+
+    out << "TARGET_LINK_LIBRARIES(Game ${CMAKE_BINARY_DIR}/../lib/MEngine.lib ${CMAKE_BINARY_DIR}/../lib/MCore.lib)" << endl;
+    out << "endif(${CMAKE_SYSTEM_NAME} MATCHES \"Windows\")" << endl;
     out.close();
 
     rerunCMake();
@@ -338,13 +347,12 @@ void MainWindow::startEditorButtonClick()
     editorProc.start(currentPath + "/MaratisEditor", args);
     QDir::setCurrent("../");
 #else
-    QDir::setCurrent(".\\Bin\\");
-    QString currentPath = QDir::current().absolutePath();
+    QString prefix = qgetenv("APPDATA") + "/maratis-manager/";
+    prefix = prefix.replace("\\", "/");
+    QDir::setCurrent(prefix + "Bin");
 
-    currentPath = currentPath.replace("/", "\\");
-
-    editorProc.start(currentPath + "\\MaratisEditor.exe", args);
-    QDir::setCurrent("..\\");
+    editorProc.start(prefix + "Bin/MaratisEditor.exe", args);
+    QDir::setCurrent(QApplication::applicationDirPath());
 #endif
 
     saveHistory();
@@ -366,6 +374,10 @@ void MainWindow::installThread()
 #ifndef WIN32
     prefix = QDir::homePath() + "/.maratis-manager/";
     QDir(QDir::homePath()).mkdir(prefix);
+    QDir::setCurrent(prefix);
+#else
+    prefix = qgetenv("APPDATA") + "\\maratis-manager\\";
+    QDir::root().mkdir(prefix);
     QDir::setCurrent(prefix);
 #endif
 
@@ -435,7 +447,10 @@ void MainWindow::installThread()
         progress = 100;
 #else
         QString appDir = QApplication::applicationDirPath();
-        appDir += "\\system\\bin\\";
+        appDir += "/system/bin/";
+
+        // qDebug() << "prefix = " << prefix;
+        // qDebug() << "appDir = " << appDir;
 
         currentAction = "Downloading...";
         if(!QDir("maratis-read-only").exists())
@@ -454,11 +469,15 @@ void MainWindow::installThread()
         currentAction = "Compiling...";
 
         QDir::setCurrent(".\\trunk\\dev");
-        int ret = QProcess::execute(appDir + "..\\Python27\\python.exe", QStringList() << "scons.py" << "-j" + QString::number(ui->threadsBox->value()).toAscii());
+
+        // qDebug() << "pwd = " << QDir::currentPath();
+        // qDebug() << "python = " << appDir + "../Python27/python.exe";
+
+        int ret = QProcess::execute(appDir + "../Python27/python.exe", QStringList() << "scons.py" << "-j" + QString::number(ui->threadsBox->value()).toAscii());
 
         if(ret != 0)
         {
-            currentAction = "Could not compile Maratis!";
+            currentAction = tr("Could not compile Maratis! Failed to launch Python!");
             progress = 100;
             return;
         }
@@ -469,7 +488,7 @@ void MainWindow::installThread()
         QDir::setCurrent("..\\..\\..\\");
         //system("del /s /q Bin");
         rmdir("Bin");
-        QDir::mkdir("Bin");
+        QDir::current().mkdir("Bin");
         //system("mkdir Bin");
 
         progress = 60;
@@ -478,10 +497,6 @@ void MainWindow::installThread()
         cp(".\\maratis-read-only\\trunk\\dev\\prod\\win32_i386\\release\\MSDK", ".\\MSDK");
         cp(".\\maratis-read-only\\trunk\\dev\\MSDK\\MCore\\Inclueds", ".\\Includes");
         cp(".\\maratis-read-only\\trunk\\dev\\MSDK\\MEngine\\Inclueds", ".\\Includes");
-        /*system("xcopy .\\maratis-read-only\\trunk\\dev\\prod\\win32_i386\\release\\Maratis\\Bin .\\Bin /e /i /h");
-        system("xcopy .\\maratis-read-only\\trunk\\dev\\prod\\win32_i386\\release\\MSDK .\\MSDK /e /i /h");
-        system("xcopy .\\maratis-read-only\\trunk\\dev\\MSDK\\MCore\\Includes .\\Includes /e /i /h");
-        system("xcopy .\\maratis-read-only\\trunk\\dev\\MSDK\\MEngine\\Includes .\\Includes /e /i /h");*/
 
         progress = 80;
 
@@ -582,7 +597,10 @@ void MainWindow::currentTabChanged(int idx)
     if(QFile(QDir::homePath() + "/.maratis-manager/Bin/MaratisEditor").exists())
         ui->editorStatusLabel->setText(tr("The Maratis editor is installed!"));
 #else
-    if(QFile("./Bin/MaratisEditor.exe").exists())
+    QString prefix = qgetenv("APPDATA") + "/maratis-manager/";
+    prefix = prefix.replace("\\", "/");
+
+    if(QFile(prefix + "Bin/MaratisEditor.exe").exists())
         ui->editorStatusLabel->setText(tr("The Maratis editor is installed!"));
 #endif
     else
