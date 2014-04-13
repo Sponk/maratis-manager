@@ -398,8 +398,7 @@ void MainWindow::installThread()
 
         if(ret != 0)
         {
-            QMessageBox::information(this, "Error", tr("Could not compile Maratis!"));
-            currentAction = "Error!";
+            currentAction = tr("Could not compile Maratis!");
             progress = 100;
             return;
         }
@@ -432,7 +431,7 @@ void MainWindow::installThread()
             rmdir("maratis-read-only");
         }
 
-        currentAction = "Done.";
+        currentAction = tr("Maratis installation was succesfully!");
         progress = 100;
 #else
         QString appDir = QApplication::applicationDirPath();
@@ -459,8 +458,7 @@ void MainWindow::installThread()
 
         if(ret != 0)
         {
-            QMessageBox::information(this, "Error", tr("Could not compile Maratis!"));
-            currentAction = "Error!";
+            currentAction = "Could not compile Maratis!";
             progress = 100;
             return;
         }
@@ -493,6 +491,7 @@ void MainWindow::installThread()
             // system("del /s /q maratis-read-only");
         }
 
+        currentAction = tr("Maratis installation was succesfully!");
         progress = 100;
 #endif
     }
@@ -542,6 +541,8 @@ void MainWindow::installUpdatesButtonClick()
 
     ui->progressBar->setVisible(false);
     ui->progressLabel->setVisible(false);
+
+    QMessageBox::information(this, "Done.", currentAction);
 }
 
 void MainWindow::updateSourceChanged()
