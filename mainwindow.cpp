@@ -504,6 +504,29 @@ void MainWindow::installThread()
     }
 }
 
+void MainWindow::cleanInstallation()
+{
+    if(ui->sourceCombo->currentIndex() == 1)
+    {
+        QMessageBox::information(this, tr("Sorry"), tr("Sorry. This feature is not yet implemented."));
+        return;
+    }
+
+    QString prefix = "";
+
+#ifndef WIN32
+    prefix = QDir::homePath() + "/.maratis-manager/";
+    QDir::setCurrent(prefix);
+#endif
+
+    rmdir(prefix + "/maratis-read-only");
+    rmdir(prefix + "/Bin");
+    rmdir(prefix + "/Includes");
+    rmdir(prefix + "/MSDK");
+
+    QMessageBox::information(this, tr("Done."), tr("Your installation was succesfully deleted."));
+}
+
 void MainWindow::installUpdatesButtonClick()
 {
     if(ui->sourceCombo->currentIndex() == 1)

@@ -32,6 +32,7 @@ public slots:
     void createPluginClick();
     void currentTabChanged(int idx);
     void rerunCMake();
+    void cleanInstallation();
 
 private:
     Ui::MainWindow *ui;
