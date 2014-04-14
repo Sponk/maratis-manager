@@ -430,11 +430,6 @@ void MainWindow::installThread()
         cp("./maratis-read-only/trunk/dev/MSDK/MCore/Includes", "./Includes");
         cp("./maratis-read-only/trunk/dev/MSDK/MEngine/Includes", "./Includes");
 
-        /*system("cp -r ./maratis-read-only/trunk/dev/prod/linux2/release/Maratis/Bin ./");
-        system("cp -r ./maratis-read-only/trunk/dev/prod/linux2/release/MSDK ./");
-        system("cp -r ./maratis-read-only/trunk/dev/MSDK/MCore/Includes ./");
-        system("cp -r ./maratis-read-only/trunk/dev/MSDK/MEngine/Includes ./");*/
-
         progress = 80;
         currentAction = "Cleaning up...";
 
