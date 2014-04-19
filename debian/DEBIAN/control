@@ -1,0 +1,9 @@
+Package: maratis-manager
+Version: 0.2.1
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: libc6, libqtgui4, cmake, subversion, libopenal-dev, libgl1-mesa-dev, libsndfile1-dev, g++, gcc
+Maintainer: Yannick Pflanzer <yp1995@live.de>
+Description: Maratis Manager
+ This program allows you to manage and update your Maratis installation

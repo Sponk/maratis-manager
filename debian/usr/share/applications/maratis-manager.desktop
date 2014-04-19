@@ -1,0 +1,8 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=0.2.1
+Type=Application
+Terminal=false
+Exec=/usr/bin/maratis-manager
+Name=Maratis Manager
+Icon=/usr/share/icons/maratis.svg
