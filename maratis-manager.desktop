@@ -5,4 +5,4 @@ Type=Application
 Terminal=false
 Exec=/usr/bin/maratis-manager
 Name=Maratis Manager
-Icon=/usr/share/icons/maratis.svg
+Icon=/usr/share/icons/maratis-manager.svg

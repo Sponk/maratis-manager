@@ -1,0 +1,23 @@
+maratis-manager (0.2.1) UNRELEASED; urgency=medium
+
+  * - Removed old include
+  * * Layout improved for GNOME 3
+  * * Moved everything important to $HOME/.maratis-manager on Linux/Mac OS X
+  * * UI updated
+  * * Changed name of produced executable for use in Debian/RPM packages
+  * * Now using layouts for better scaling
+  * * Even more layouts
+  * * Choose right tab on startup
+  * + Build plugin functionality for Windows and Linux + Open in file manager feature
+  * * Now using just one codebase for CMake handling for all operating systems!
+  * + Information screen added
+  * * Small update fixing minor misbehaviours
+  * * Bugfixed when copying files
+  * + You can now rerun CMake without recreating the whole build environment
+  * * Better user feedback about the Maratis compilation
+  * + You can now delete your current Maratis installation to redownload it from SVN
+  * * Many bugs on Windows fixed
+  * - Some unnecessary comments removed
+  * + Debian packaging information added
+
+ -- Yannick Pflanzer <yp1995@live.de>  Sat, 19 Apr 2014 10:45:08 +0200

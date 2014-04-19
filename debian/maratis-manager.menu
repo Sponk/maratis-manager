@@ -1,0 +1,3 @@
+?package(maratis-manager):needs=x11 section=Apps/Tools \
+  icon="/usr/share/icons/maratis-manager.svg"\
+  title="Maratis Manager" command="/usr/bin/maratis-manager"
